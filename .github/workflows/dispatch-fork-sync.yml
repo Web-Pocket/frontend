@@ -1,0 +1,30 @@
+name: Dispatch fork sync
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  dispatch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dispatch sync event to fork
+        env:
+          DISPATCH_TOKEN: ${{ secrets.FORK_DISPATCH_TOKEN }}
+          FORK_REPO: ckdduf138/frontend
+        run: |
+          if [ -z "$DISPATCH_TOKEN" ]; then
+            echo "Missing secret FORK_DISPATCH_TOKEN" >&2
+            exit 1
+          fi
+
+          curl -sS -X POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer $DISPATCH_TOKEN" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "https://api.github.com/repos/$FORK_REPO/dispatches" \
+            -d '{"event_type":"sync-from-upstream","client_payload":{"upstream":"Web-Pocket/frontend","branch":"main"}}'

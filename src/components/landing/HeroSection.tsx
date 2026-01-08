@@ -1,10 +1,26 @@
 import type { FC } from 'react';
 import { ArrowRight, Search, Smartphone, Globe, Zap, Shield, Music, Camera, FileText, Calculator } from 'lucide-react';
 import Link from 'next/link';
+import { MOCK_APPS } from '@/lib/data/apps';
 
 interface HeroSectionProps {
   onLoginClick: () => void;
 }
+
+const SOCIAL_PROOF_APPS = MOCK_APPS.filter((app) => app.isPopular).slice(0, 5);
+
+const hostnameFromUrl = (url: string) => {
+  try {
+    return new URL(url).hostname;
+  } catch {
+    return url;
+  }
+};
+
+const logoUrl = (url: string) => `https://logo.clearbit.com/${hostnameFromUrl(url)}?size=64`;
+
+const faviconUrl = (url: string) =>
+  `https://www.google.com/s2/favicons?domain=${encodeURIComponent(hostnameFromUrl(url))}&sz=64`;
 
 export const HeroSection: FC<HeroSectionProps> = ({ onLoginClick }) => (
   <section className="relative flex min-h-[100svh] flex-col items-center justify-center overflow-hidden px-4 sm:px-6">
@@ -69,10 +85,19 @@ export const HeroSection: FC<HeroSectionProps> = ({ onLoginClick }) => (
       {/* Social proof */}
       <div className="mt-10 flex flex-col items-center gap-3 sm:mt-12 sm:flex-row sm:justify-center sm:gap-4">
         <div className="flex -space-x-2">
-          {[...Array(5)].map((_, i) => (
-            <div
-              key={i}
-              className="h-8 w-8 rounded-full border-2 border-white bg-gradient-to-br from-sky-200 to-sky-300 sm:h-10 sm:w-10"
+          {SOCIAL_PROOF_APPS.map((app) => (
+            <img
+              key={app.id}
+              src={logoUrl(app.url)}
+              alt={app.name}
+              className="h-8 w-8 rounded-full border-2 border-white bg-white object-contain p-0.5 shadow-sm sm:h-10 sm:w-10"
+              loading="lazy"
+              referrerPolicy="no-referrer"
+              onError={(e) => {
+                const img = e.currentTarget;
+                const fallback = faviconUrl(app.url);
+                if (img.src !== fallback) img.src = fallback;
+              }}
             />
           ))}
         </div>
